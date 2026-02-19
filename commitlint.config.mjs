@@ -1,0 +1,12 @@
+const commitlintConfig = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'subject-case': [
+      2,
+      'never',
+      ['sentence-case', 'start-case', 'pascal-case', 'upper-case'],
+    ],
+  },
+};
+
+export default commitlintConfig;

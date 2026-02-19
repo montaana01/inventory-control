@@ -6,20 +6,60 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "start:standalone": "node .next/standalone/server.js",
+    "prepare": "husky",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --max-warnings=0 --fix",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "stylelint": "stylelint \"src/**/*.{css,scss}\" --allow-empty-input",
+    "stylelint:fix": "stylelint \"src/**/*.{css,scss}\" --allow-empty-input --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "audit": "npm audit",
+    "audit:prod": "npm audit --omit=dev",
+    "check": "npm run typecheck && npm run lint && npm run stylelint && npm run format:check",
+    "precommit": "lint-staged",
+    "commitmsg": "commitlint --edit"
+  },
+  "engines": {
+    "node": ">=22.13.0 <23"
   },
   "dependencies": {
+    "mysql2": "^3.17.2",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
+    "eslint": "^9.22.0",
     "eslint-config-next": "16.1.6",
-    "typescript": "^5"
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
+    "prettier": "^3.5.3",
+    "stylelint": "^16.16.0",
+    "stylelint-config-standard": "^38.0.0",
+    "typescript": "^5",
+    "typescript-eslint": "^8.26.1"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,tsx}": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.{css,scss}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

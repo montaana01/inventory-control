@@ -4,7 +4,7 @@ import { GlobalWithMysqlPool, MysqlPool } from '@/shared/types/mysql';
 
 const globalWithMysqlPool = globalThis as GlobalWithMysqlPool;
 
-function buildMysqlUrl(): string {
+export function buildMysqlUrl(): string {
   const host: string = process.env.DB_HOST ?? 'localhost';
   const port = Number.parseInt(process.env.DB_PORT ?? '3306', 10);
   const database = process.env.DB_NAME;

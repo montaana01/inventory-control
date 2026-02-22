@@ -1,0 +1,274 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(191)
+  name      String?  @db.VarChar(191)
+  role      Role     @default(USER)
+  isBlocked Boolean  @default(false)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  
+  inventories Inventory[] @relation("InventoryCreator")
+  items       Item[]      @relation("ItemCreator")
+  likes       ItemLike[]
+  posts       InventoryPost[]
+  access      InventoryAccess[]
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            Int     @map("user_id")
+  type              String  @db.VarChar(32)
+  provider          String  @db.VarChar(64)
+  providerAccountId String  @map("provider_account_id") @db.VarChar(191)
+
+  refresh_token            String? @db.Text
+  access_token             String? @db.Text
+  expires_at               Int?
+  token_type               String? @db.VarChar(32)
+  scope                    String? @db.VarChar(255)
+  id_token                 String? @db.Text
+  session_state            String? @db.VarChar(255)
+  refresh_token_expires_in Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique @map("session_token") @db.VarChar(191)
+  userId       Int      @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String   @db.VarChar(191)
+  token      String   @db.VarChar(191)
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  title     String   @unique @db.VarChar(128)
+  sortOrder Int      @default(0)
+
+  inventories Inventory[]
+}
+
+model Inventory {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(191)
+  description String?  @db.Text
+  imageUrl    String?  @map("image_url") @db.VarChar(2048)
+  isPublic    Boolean  @default(false) @map("is_public")
+
+  // category is lookup for filtering only
+  categoryId Int      @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  creatorId Int  @map("creator_id")
+  creator   User @relation("InventoryCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+
+  // Custom ID config (minimal v0)
+  customIdEnabled Boolean @default(false) @map("custom_id_enabled")
+  customIdFormat  String? @map("custom_id_format") @db.VarChar(512)
+
+  customString1State Boolean @default(false) @map("custom_string1_state")
+  customString1Name  String? @map("custom_string1_name") @db.VarChar(191)
+  customString1ShowInTable Boolean @default(true) @map("custom_string1_show_in_table")
+  customString2State Boolean @default(false) @map("custom_string2_state")
+  customString2Name  String? @map("custom_string2_name") @db.VarChar(191)
+  customString2ShowInTable Boolean @default(true) @map("custom_string2_show_in_table")
+  customString3State Boolean @default(false) @map("custom_string3_state")
+  customString3Name  String? @map("custom_string3_name") @db.VarChar(191)
+  customString3ShowInTable Boolean @default(true) @map("custom_string3_show_in_table")
+
+  customInt1State Boolean @default(false) @map("custom_int1_state")
+  customInt1Name  String? @map("custom_int1_name") @db.VarChar(191)
+  customInt1ShowInTable Boolean @default(true) @map("custom_int1_show_in_table")
+  customInt2State Boolean @default(false) @map("custom_int2_state")
+  customInt2Name  String? @map("custom_int2_name") @db.VarChar(191)
+  customInt2ShowInTable Boolean @default(true) @map("custom_int2_show_in_table")
+  customInt3State Boolean @default(false) @map("custom_int3_state")
+  customInt3Name  String? @map("custom_int3_name") @db.VarChar(191)
+  customInt3ShowInTable Boolean @default(true) @map("custom_int3_show_in_table")
+
+  customBool1State Boolean @default(false) @map("custom_bool1_state")
+  customBool1Name  String? @map("custom_bool1_name") @db.VarChar(191)
+  customBool1ShowInTable Boolean @default(true) @map("custom_bool1_show_in_table")
+  customBool2State Boolean @default(false) @map("custom_bool2_state")
+  customBool2Name  String? @map("custom_bool2_name") @db.VarChar(191)
+  customBool2ShowInTable Boolean @default(true) @map("custom_bool2_show_in_table")
+  customBool3State Boolean @default(false) @map("custom_bool3_state")
+  customBool3Name  String? @map("custom_bool3_name") @db.VarChar(191)
+  customBool3ShowInTable Boolean @default(true) @map("custom_bool3_show_in_table")
+
+  customText1State Boolean @default(false) @map("custom_text1_state")
+  customText1Name  String? @map("custom_text1_name") @db.VarChar(191)
+  customText1ShowInTable Boolean @default(true) @map("custom_text1_show_in_table")
+  customText2State Boolean @default(false) @map("custom_text2_state")
+  customText2Name  String? @map("custom_text2_name") @db.VarChar(191)
+  customText2ShowInTable Boolean @default(true) @map("custom_text2_show_in_table")
+  customText3State Boolean @default(false) @map("custom_text3_state")
+  customText3Name  String? @map("custom_text3_name") @db.VarChar(191)
+  customText3ShowInTable Boolean @default(true) @map("custom_text3_show_in_table")
+
+  customLink1State Boolean @default(false) @map("custom_link1_state")
+  customLink1Name  String? @map("custom_link1_name") @db.VarChar(191)
+  customLink1ShowInTable Boolean @default(true) @map("custom_link1_show_in_table")
+  customLink2State Boolean @default(false) @map("custom_link2_state")
+  customLink2Name  String? @map("custom_link2_name") @db.VarChar(191)
+  customLink2ShowInTable Boolean @default(true) @map("custom_link2_show_in_table")
+  customLink3State Boolean @default(false) @map("custom_link3_state")
+  customLink3Name  String? @map("custom_link3_name") @db.VarChar(191)
+  customLink3ShowInTable Boolean @default(true) @map("custom_link3_show_in_table")
+
+  version   Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  items        Item[]
+  accessList   InventoryAccess[]
+  tags         InventoryTag[]
+  posts        InventoryPost[]
+  sequence     InventorySequence?
+
+  @@index([categoryId, createdAt])
+  @@index([creatorId, createdAt])
+}
+
+model InventorySequence {
+  inventoryId Int       @id @map("inventory_id")
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  nextValue   Int       @default(1) @map("next_value")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+}
+
+model InventoryAccess {
+  id          Int       @id @default(autoincrement())
+  inventoryId Int       @map("inventory_id")
+  userId      Int       @map("user_id")
+  canWrite    Boolean   @default(true) @map("can_write")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([inventoryId, userId])
+  @@index([userId])
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  title     String   @unique @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  inventories InventoryTag[]
+}
+
+model InventoryTag {
+  id          Int       @id @default(autoincrement())
+  inventoryId Int       @map("inventory_id")
+  tagId       Int       @map("tag_id")
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Restrict)
+
+  @@unique([inventoryId, tagId])
+  @@index([tagId])
+}
+
+model Item {
+  id          Int      @id @default(autoincrement())
+  inventoryId Int      @map("inventory_id")
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  customId String? @map("custom_id") @db.VarChar(191)
+
+  string1 String? @map("string1") @db.VarChar(191)
+  string2 String? @map("string2") @db.VarChar(191)
+  string3 String? @map("string3") @db.VarChar(191)
+
+  int1 Decimal? @map("int1") @db.Decimal(12, 2)
+  int2 Decimal? @map("int2") @db.Decimal(12, 2)
+  int3 Decimal? @map("int3") @db.Decimal(12, 2)
+
+  bool1 Boolean? @map("bool1")
+  bool2 Boolean? @map("bool2")
+  bool3 Boolean? @map("bool3")
+
+  text1 String? @map("text1") @db.Text
+  text2 String? @map("text2") @db.Text
+  text3 String? @map("text3") @db.Text
+
+  link1 String? @map("link1") @db.VarChar(2048)
+  link2 String? @map("link2") @db.VarChar(2048)
+  link3 String? @map("link3") @db.VarChar(2048)
+
+  creatorId Int  @map("creator_id")
+  creator   User @relation("ItemCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+
+  version   Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  likes ItemLike[]
+
+  @@unique([inventoryId, customId])
+  @@index([inventoryId, createdAt])
+}
+
+model ItemLike {
+  id        Int      @id @default(autoincrement())
+  itemId    Int      @map("item_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([itemId, userId])
+  @@index([userId])
+}
+
+model InventoryPost {
+  id          Int      @id @default(autoincrement())
+  inventoryId Int      @map("inventory_id")
+  userId      Int      @map("user_id")
+  body        String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([inventoryId, createdAt])
+}
+
+enum Role { 
+  USER 
+  ADMIN 
+} 
